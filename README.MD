@@ -1,75 +1,64 @@
-Playwright E-commerce Automation Suite
-This project is an automated testing suite for an E-commerce platform, built with Playwright and TypeScript. It follows the industry's best practices, focusing on maintainability, scalability, and fast execution.
+# 🎭 Playwright E-commerce Automation
+> **Robust Web Testing Suite with TypeScript & Page Object Model (POM)**
 
-🚀 Technologies Used
-Playwright: Fast, reliable, and capable of cross-browser testing.
+[![Playwright Tests](https://github.com/seu-usuario/seu-repo/actions/workflows/playwright.yml/badge.svg)](https://github.com/seu-usuario/seu-repo/actions)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Playwright](https://img.shields.io/badge/playwright-%232EAD33.svg?style=for-the-badge&logo=playwright&logoColor=white)
+![Node.js](https://img.shields.io/badge/node.js-v18+-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 
-TypeScript: Provides static typing for better developer experience and code quality.
+---
 
-Page Object Model (POM): Design pattern to enhance test maintenance and reduce code duplication.
+## 📖 Table of Contents
+* [Overview](#-overview)
+* [Project Architecture](#-project-architecture-pom)
+* [Key Features](#-key-features)
+* [Installation](#-installation--setup)
+* [Running Tests](#-running-tests)
+* [CI/CD Pipeline](#-cicd-pipeline-github-actions)
+* [Best Practices](#-best-practices)
 
-GitHub Actions: CI/CD integration for automated test execution on every push or pull request.
+---
 
-Allure Report (Optional): Detailed visual reporting of test results.
+## 🎯 Overview
+This repository contains a professional automated testing suite for the [LambdaTest eCommerce Playground](https://ecommerce-playground.lambdatest.io/). 
 
-🏗️ Project Architecture (POM)
-This project strictly follows the Page Object Model (POM).
+Coming from a background in **Cypress** and **Robot Framework**, this project demonstrates a transition to **Playwright**, leveraging its superior speed, native parallel execution, and strong **TypeScript** integration.
 
-pages/: Contains page classes where locators and page-specific actions (methods) are defined.
+---
 
-tests/: Contains the actual test scripts. No raw locators are allowed here; they must call methods from the Page Objects.
+## 🏗️ Project Architecture (POM)
+We use the **Page Object Model (POM)** design pattern to ensure the code is clean, modular, and easy to maintain.
 
-🛠️ Installation & Setup
-Clone the repository:
+* **`pages/`**: The "Single Source of Truth". Contains all selectors (`readonly`) and business logic.
+* **`tests/`**: The "Execution Layer". Contains clean, readable test cases focusing on assertions.
+* **`playwright.config.ts`**: Global configuration for timeouts, retries, and browsers.
 
-Bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
-Install dependencies:
+---
 
-Bash
+## ✨ Key Features
+* 🚀 **High Performance:** Tests run in parallel across multiple browsers.
+* 🛡️ **Type Safety:** Full TypeScript support for reliable refactoring.
+* 📸 **Rich Artifacts:** Screenshots, videos, and traces generated on failure.
+* 🔍 **Smart Locators:** Use of user-centric locators (`getByRole`, `getByText`).
+* 📊 **HTML Reports:** Comprehensive visual feedback for every test run.
+
+---
+
+## 🛠️ Installation & Setup
+
+### 1️⃣ Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed (v18 or higher).
+
+### 2️⃣ Get Started
+```bash
+# Clone the repository
+git clone [https://github.com/your-username/playwright-ecommerce-ts.git](https://github.com/your-username/playwright-ecommerce-ts.git)
+
+# Enter the directory
+cd playwright-ecommerce-ts
+
+# Install project dependencies
 npm install
-Install Playwright Browsers:
 
-Bash
+# Install Playwright browser binaries
 npx playwright install
-🏃 Running Tests
-Run all tests:
-
-Bash
-npx playwright test
-Run tests in headed mode (UI):
-
-Bash
-npx playwright test --headed
-Show HTML Report:
-
-Bash
-npx playwright show-report
-🤖 CI/CD Pipeline (GitHub Actions)
-This project is integrated with GitHub Actions. The pipeline is triggered on:
-
-push to main or master branches.
-
-pull_request to main.
-
-The workflow ensures that:
-
-The environment is set up (Node.js).
-
-Dependencies and browsers are installed.
-
-Tests are executed across different browsers (Chromium, Firefox, Webkit).
-
-Test results are uploaded as artifacts.
-
-🌟 Best Practices Followed
-Readonly Locators: Using TypeScript's readonly to prevent accidental locator overwrites.
-
-Async/Await: Proper handling of asynchronous operations to ensure test stability.
-
-Web-First Assertions: Utilizing expect(locator).toBeVisible() to leverage Playwright's auto-retry logic.
-
-No Hardcoded Waits: Avoiding page.waitForTimeout() in favor of dynamic waits and locators.
-
-Clean Code: Meaningful test descriptions and modular Page Objects.
