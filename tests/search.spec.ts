@@ -86,4 +86,4 @@ test('deve validar o título da página após buscar por Apple', async ({ page }
   // Validação: O header de resultado deve conter o termo buscado
   // Baseado na linha 10 do seu código original
   await expect(searchPage.searchResultHeader).toContainText('Search - Apple');
-});
+});71
