@@ -21,8 +21,13 @@ export default defineConfig({
    */
   workers: process.env.CI ? 4 : undefined,
 
-  /* Reporter HTML para análise detalhada */
-  reporter: 'html',
+  /* CONFIGURAÇÃO DE REPORTERS:
+   * Agora geramos HTML para depuração e JSON para o sumário do GitHub/Slack.
+   */
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'test-results.json' }] 
+  ],
 
   /* Configurações compartilhadas para os testes */
   use: {
