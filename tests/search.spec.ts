@@ -54,3 +54,36 @@ test('deve verificar que o iPod Touch está fora de estoque', async ({ page }) =
   // Valida que o texto esperado está presente nesse container
   await expect(availabilityRow).toContainText('Out Of Stock');
 });
+
+
+/**
+ * Cenário 3: Deve remover um produto do carrinho com sucesso
+ */
+test('deve remover um produto do carrinho e validar que está vazio', async ({ page }) => {
+  const searchPage = new SearchPage(page);
+
+  await searchPage.goto();
+  await searchPage.searchFor('iPhone');
+  await searchPage.addFirstProductToCart();
+  
+  // Ação: Remover o produto
+  await searchPage.removeProductFromCart();
+
+  // Validação: Mensagem de carrinho vazio deve aparecer
+  // Usamos o snapshot da árvore de acessibilidade para confirmar o texto
+  await expect(searchPage.emptyCartMsg).toBeVisible();
+});
+
+/**
+ * Cenário 4: Deve validar que o título da página de busca está correto
+ */
+test('deve validar o título da página após buscar por Apple', async ({ page }) => {
+  const searchPage = new SearchPage(page);
+
+  await searchPage.goto();
+  await searchPage.searchFor('Apple');
+
+  // Validação: O header de resultado deve conter o termo buscado
+  // Baseado na linha 10 do seu código original
+  await expect(searchPage.searchResultHeader).toContainText('Search - Apple');
+});

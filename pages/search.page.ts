@@ -10,6 +10,10 @@ export class SearchPage {
   readonly cartToast: Locator;
   readonly ipodTouchItem: Locator;
   readonly availabilityStatus: Locator;
+  readonly removeBtn: Locator;
+  readonly emptyCartMsg: Locator;
+  readonly priceFilterMax: Locator;
+  
 
   constructor(page: Page) {
     this.page = page;
@@ -20,14 +24,33 @@ export class SearchPage {
     this.cartIcon = page.locator('#entry_217825'); // Ícone do carrinho no topo
     this.cartToast = page.locator('#notification-box-top');
     this.ipodTouchItem = page.locator('.product-layout', { hasText: 'iPod Touch' }).first();
+    this.cartIcon = page.locator('#cart');
+    this.removeBtn = page.getByRole('button', { name: 'Remove' });
+    this.emptyCartMsg = page.getByText('Your shopping cart is empty!');
+    this.priceFilterMax = page.locator('#input-price-top');
   
 
    this.availabilityStatus = page.locator('li', { hasText: 'Availability:' }).locator('span, div, b').last();
 
    this.availabilityStatus = page.getByText('Out Of Stock').first();
 
+
+    
+
+
+
   }
 
+
+  async removeProductFromCart() {
+  await this.cartIcon.click();
+  await this.removeBtn.click();
+}
+
+async filterByMaxPrice(price: string) {
+  await this.priceFilterMax.fill(price);
+  await this.priceFilterMax.press('Enter');
+}  
  async addFirstProductToCart() {
   await this.addToCartBtn.hover(); // Algumas vezes o botão só aparece no hover
   await this.addToCartBtn.click();
