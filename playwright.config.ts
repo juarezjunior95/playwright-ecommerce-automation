@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -16,8 +17,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   /* * OTIMIZAÇÃO DE TEMPO: 
-   * No CI, aumentamos para 4 workers (ou mais, dependendo da máquina).
-   * Isso fará com que os testes rodem simultaneamente em vez de um por um.
+   * No CI, aumentamos para 4 workers.
    */
   workers: process.env.CI ? 4 : undefined,
 
@@ -26,34 +26,22 @@ export default defineConfig({
 
   /* Configurações compartilhadas para os testes */
   use: {
-    /* * OTIMIZAÇÃO: Coleta o trace apenas na primeira retentativa de um erro.
-     * Tirar prints e gravar vídeos de testes que PASSAM consome muito tempo e CPU.
-     */
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'off', // Desligado para ganhar velocidade; ligue apenas se precisar depurar algo difícil.
-    
-    /* URL base para facilitar as navegações */
+    video: 'off', 
     baseURL: 'https://ecommerce-playground.lambdatest.io/',
   },
 
-  /* * CONFIGURAÇÃO DE PROJETOS (NAVEGADORES):
-   * Para máxima velocidade no dia-a-dia, mantemos o Chromium como principal.
-   */
+  /* CONFIGURAÇÃO DE PROJETOS */
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
-    /* * DICA: Se o seu tempo estiver muito alto, comente o Firefox e o Webkit 
-     * e ative-os apenas em deploys para produção ou em pipelines específicas.
-     */
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
-
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
