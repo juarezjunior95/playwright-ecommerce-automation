@@ -30,24 +30,16 @@ jobs:
       if: always()
       run: |
         echo "### 📊 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
-        
-        # Extrair totais usando ferramentas de shell (jq é nativo no Ubuntu do GitHub)
         PASSED=$(jq '.stats.expected' test-results.json)
         FAILED=$(jq '.stats.unexpected' test-results.json)
-        SKIPPED=$(jq '.stats.skipped' test-results.json)
-        DURATION=$(jq '.stats.duration' test-results.json | awk '{print $1/1000 "s"}')
-
+        
         echo "| Status | Quantity |" >> $GITHUB_STEP_SUMMARY
         echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
         echo "| ✅ Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
         echo "| ❌ Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
-        echo "| ⏩ Skipped | $SKIPPED |" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Total Duration:** $DURATION" >> $GITHUB_STEP_SUMMARY
         
-        # Listar títulos dos testes que falharam em Inglês
         if [ "$FAILED" -ne "0" ]; then
-          echo "#### ❌ Failed Tests Details" >> $GITHUB_STEP_SUMMARY
+          echo "#### ❌ Failed Tests Details (English)" >> $GITHUB_STEP_SUMMARY
           jq -r '.suites[].specs[].tests[] | select(.status=="unexpected") | "- " + .title' test-results.json >> $GITHUB_STEP_SUMMARY
         fi
 
@@ -56,20 +48,6 @@ jobs:
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        SLACK_USERNAME: 'Playwright Bot'
-        SLACK_ICON: https://playwright.dev/img/playwright-logo.svg
-        SLACK_TITLE: 'Playwright Suite: ${{ job.status }}'
-        SLACK_MESSAGE: |
-          *Repository:* ${{ github.repository }}
-          *Branch:* `${{ github.ref_name }}`
-          *Summary:* ✅ ${{ env.PASSED }} | ❌ ${{ env.FAILED }} | ⏩ ${{ env.SKIPPED }}
-          *Check the GitHub Actions Summary for failure details.*
+        SLACK_TITLE: 'Playwright: $PASSED Passed | $FAILED Failed'
+        SLACK_MESSAGE: 'Repository: ${{ github.repository }}\nSummary: ✅ $PASSED | ❌ $FAILED'
         SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
-        SLACK_FOOTER: 'GitHub Actions Report'
-
-    - uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
