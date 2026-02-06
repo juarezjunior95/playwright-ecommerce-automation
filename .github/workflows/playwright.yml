@@ -17,37 +17,76 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
+      # Certifique-se de ter feito o push do package-lock.json atualizado para evitar o erro EUSAGE
       run: npm ci
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
     - name: Run Playwright tests
-      # Geramos o report em JSON para extrair os nomes dos testes que falharam
-      run: npx playwright test --reporter=html,json > test-results.json || true
+      # O config.ts agora gera o test-results.json automaticamente
+      run: npx playwright test
 
-    - name: Generate Job Summary
+    - name: Extract Test Results
+      if: always()
+      run: |
+        # Extrai os dados do JSON para variáveis de ambiente
+        PASSED=$(jq '.stats.expected' test-results.json)
+        FAILED=$(jq '.stats.unexpected' test-results.json)
+        SKIPPED=$(jq '.stats.skipped' test-results.json)
+        DURATION=$(jq '.stats.duration' test-results.json | awk '{print $1/1000}')
+        
+        echo "PASSED=$PASSED" >> $GITHUB_ENV
+        echo "FAILED=$FAILED" >> $GITHUB_ENV
+        echo "SKIPPED=$SKIPPED" >> $GITHUB_ENV
+        echo "TEST_TIME=$DURATION" >> $GITHUB_ENV
+
+    - name: Generate GitHub Step Summary
       if: always()
       run: |
         echo "### 📊 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
-        PASSED=$(jq '.stats.expected' test-results.json)
-        FAILED=$(jq '.stats.unexpected' test-results.json)
-        
         echo "| Status | Quantity |" >> $GITHUB_STEP_SUMMARY
         echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
-        echo "| ✅ Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
-        echo "| ❌ Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
+        echo "| ✅ Passed | ${{ env.PASSED }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| ❌ Failed | ${{ env.FAILED }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| ⏭️ Skipped | ${{ env.SKIPPED }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Total test duration:** ${{ env.TEST_TIME }}s" >> $GITHUB_STEP_SUMMARY
         
-        if [ "$FAILED" -ne "0" ]; then
-          echo "#### ❌ Failed Tests Details (English)" >> $GITHUB_STEP_SUMMARY
+        # Lista os títulos dos testes que falharam em inglês
+        if [ "${{ env.FAILED }}" != "0" ]; then
+          echo "#### ❌ Failed Tests Details" >> $GITHUB_STEP_SUMMARY
           jq -r '.suites[].specs[].tests[] | select(.status=="unexpected") | "- " + .title' test-results.json >> $GITHUB_STEP_SUMMARY
         fi
 
-    - name: Slack Notification
+    - name: Notify Slack
       if: always()
-      uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        SLACK_TITLE: 'Playwright: $PASSED Passed | $FAILED Failed'
-        SLACK_MESSAGE: 'Repository: ${{ github.repository }}\nSummary: ✅ $PASSED | ❌ $FAILED'
-        SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
+      run: |
+        if [ "${{ env.FAILED }}" == "0" ]; then
+          COLOR="good"
+          ICON="✅"
+        else
+          COLOR="danger"
+          ICON="❌"
+        fi
+
+        curl -X POST -H 'Content-type: application/json' \
+        --data "{
+          \"attachments\": [
+            {
+              \"color\": \"$COLOR\",
+              \"title\": \"$ICON Playwright: ${{ env.PASSED }} Passed | ${{ env.FAILED }} Failed\",
+              \"title_link\": \"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+              \"text\": \"*Repository:* ${{ github.repository }}\n*Branch:* \`${{ github.ref_name }}\`\n*Duration:* ${{ env.TEST_TIME }}s\n\n*Summary:* ✅ ${{ env.PASSED }} | ❌ ${{ env.FAILED }} | ⏭️ ${{ env.SKIPPED }}\",
+              \"footer\": \"GitHub Actions Report\"
+            }
+          ]
+        }" \
+        ${{ secrets.SLACK_WEBHOOK }}
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
