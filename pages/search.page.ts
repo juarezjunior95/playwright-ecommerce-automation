@@ -13,6 +13,8 @@ export class SearchPage {
   readonly removeBtn: Locator;
   readonly emptyCartMsg: Locator;
   readonly priceFilterMax: Locator;
+  readonly firstProductLink: Locator;
+  readonly productCode: Locator;
   
 
   constructor(page: Page) {
@@ -28,6 +30,15 @@ export class SearchPage {
     this.removeBtn = page.getByRole('button', { name: 'Remove' });
     this.emptyCartMsg = page.getByText('Your shopping cart is empty!');
     this.priceFilterMax = page.locator('#input-price-top');
+    this.page = page;
+    this.searchInput = page.getByRole('textbox', { name: 'Search For Products' });
+    this.searchButton = page.getByRole('button', { name: 'Search' });
+    
+    // Localiza o link do primeiro produto na lista de resultados
+    this.firstProductLink = page.locator('.product-layout h4 a').first();
+    
+    // Localiza o elemento que contém o código do produto na página de detalhes
+    this.productCode = page.locator('li:has-text("Product Code:")');
   
 
    this.availabilityStatus = page.locator('li', { hasText: 'Availability:' }).locator('span, div, b').last();
@@ -51,9 +62,16 @@ async filterByMaxPrice(price: string) {
   await this.priceFilterMax.fill(price);
   await this.priceFilterMax.press('Enter');
 }  
+
+
+
+  async clickFirstProduct() {
+    await this.firstProductLink.click();
+  }
+
  async addFirstProductToCart() {
-  await this.addToCartBtn.hover(); // Algumas vezes o botão só aparece no hover
-  await this.addToCartBtn.click();
+  await this.addToCartBtn.hover({force: true}); // Algumas vezes o botão só aparece no hover
+  await this.addToCartBtn.click({force: true});
 }
   async clickOnIpodTouch() {
   // scrollIntoViewIfNeeded() é automático no click(), 

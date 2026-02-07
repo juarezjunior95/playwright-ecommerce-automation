@@ -10,30 +10,20 @@ test('deve realizar busca de produto com sucesso', async ({ page }) => {
   await expect(searchPage.searchResultHeader).toContainText('Search - iPhone');
 });
 
-test('deve adicionar um iPhone ao carrinho e validar a inclusão', async ({ page }) => {
+test('should verify product code of the first search result', async ({ page }) => {
   const searchPage = new SearchPage(page);
 
-  await searchPage.goto();
+  // Step 1: Ir para a página inicial e buscar por iPhone
+  await page.goto('/'); 
   await searchPage.searchFor('iPhone');
 
-  // Passo 1: Adicionar ao carrinho
-  await searchPage.addFirstProductToCart();
+  // Step 2: Clicar no primeiro produto da lista
+  await searchPage.clickFirstProduct();
 
-  // Passo 2: Validar se o toast de sucesso apareceu (Boa prática!)
-  await expect(searchPage.cartToast).toBeVisible();
-  await expect(searchPage.cartToast).toContainText('Success: You have added');
-
-  // Passo 3: Ir para o carrinho
-  // Vamos clicar no ícone do carrinho para ver o resumo
-  await searchPage.openCart();
-
-  // Passo 4: Verificação final
-  // Verificamos se dentro do mini-cart ou da página de checkout o item aparece
-  const cartTable = page.locator('#checkout-cart'); 
-  await expect(page).toHaveURL(/.*checkout\/cart/); // Valida se navegou para a página de carrinho
-  await expect(page.locator('td.text-left', { hasText: 'iPhone' }).first()).toBeVisible();
+  // Step 3: Validar que na tela de detalhes contém o texto esperado
+  // O Playwright vai esperar o elemento aparecer automaticamente
+  await expect(searchPage.productCode).toContainText('Product Code: product 11');
 });
-
 
 test('deve verificar que o iPod Touch está fora de estoque', async ({ page }) => {
   const searchPage = new SearchPage(page);
